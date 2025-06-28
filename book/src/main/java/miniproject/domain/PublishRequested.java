@@ -1,14 +1,11 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
-import java.util.*;
 import lombok.*;
-import miniproject.domain.*;
 import miniproject.infra.AbstractEvent;
 
-//<<< DDD / Domain Event
 @Data
 @ToString
+@NoArgsConstructor
 public class PublishRequested extends AbstractEvent {
 
     private Long bookId;
@@ -19,10 +16,10 @@ public class PublishRequested extends AbstractEvent {
 
     public PublishRequested(Book aggregate) {
         super(aggregate);
-    }
-
-    public PublishRequested() {
-        super();
+        this.bookId = aggregate.getBookId();
+        this.title = aggregate.getTitle();
+        this.content = aggregate.getContent();
+        this.writerId = aggregate.getWriterId();
+        this.coverUrl = aggregate.getCoverUrl();
     }
 }
-//>>> DDD / Domain Event
