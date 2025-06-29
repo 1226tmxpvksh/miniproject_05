@@ -1,14 +1,11 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
-import java.util.*;
 import lombok.*;
-import miniproject.domain.*;
 import miniproject.infra.AbstractEvent;
 
-//<<< DDD / Domain Event
 @Data
 @ToString
+@NoArgsConstructor
 public class SubscriptionCanceled extends AbstractEvent {
 
     private Long userId;
@@ -16,10 +13,7 @@ public class SubscriptionCanceled extends AbstractEvent {
 
     public SubscriptionCanceled(Subscription aggregate) {
         super(aggregate);
-    }
-
-    public SubscriptionCanceled() {
-        super();
+        this.userId = aggregate.getUserId();
+        this.subscriptionStatus = aggregate.getSubscriptionStatus();
     }
 }
-//>>> DDD / Domain Event

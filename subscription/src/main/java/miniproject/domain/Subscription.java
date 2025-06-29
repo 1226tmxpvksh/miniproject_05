@@ -18,135 +18,79 @@ public class Subscription {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     private Long userId;
-
-    private String subscriptionStatus;
-
+    private String subscriptionStatus; // SUBSCRIBED / CANCELED
     private Date subscriptionExpiryDate;
 
     public static SubscriptionRepository repository() {
-        SubscriptionRepository subscriptionRepository = SubscriptionApplication.applicationContext.getBean(
-            SubscriptionRepository.class
-        );
-        return subscriptionRepository;
+        return SubscriptionApplication.applicationContext.getBean(SubscriptionRepository.class);
     }
 
     //<<< Clean Arch / Port Method
-    public void checkSubscription(
-        CheckSubscriptionCommand checkSubscriptionCommand
-    ) {
-        //implement business logic here:
-
-        BookAccessGranted bookAccessGranted = new BookAccessGranted(this);
-        bookAccessGranted.publishAfterCommit();
-        BookAccessDenied bookAccessDenied = new BookAccessDenied(this);
-        bookAccessDenied.publishAfterCommit();
+    public void checkSubscription(CheckSubscriptionCommand cmd) {
+        if ("SUBSCRIBED".equals(this.subscriptionStatus)) {
+            BookAccessGranted granted = new BookAccessGranted(this);
+            granted.publishAfterCommit();
+        } else {
+            BookAccessDenied denied = new BookAccessDenied(this);
+            denied.publishAfterCommit();
+        }
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public void subscriptionRegister(
-        SubscriptionRegisterCommand subscriptionRegisterCommand
-    ) {
-        //implement business logic here:
+    public void subscriptionRegister(SubscriptionRegisterCommand cmd) {
+        this.subscriptionStatus = "SUBSCRIBED";
+        this.subscriptionExpiryDate = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30); // 30일 구독
 
-        SubscriptionRegistered subscriptionRegistered = new SubscriptionRegistered(
-            this
-        );
-        subscriptionRegistered.publishAfterCommit();
+        SubscriptionRegistered event = new SubscriptionRegistered(this);
+        event.publishAfterCommit();
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public void subscriptionCancel(
-        SubscriptionCancelCommand subscriptionCancelCommand
-    ) {
-        //implement business logic here:
+    public void subscriptionCancel(SubscriptionCancelCommand cmd) {
+        this.subscriptionStatus = "CANCELED";
+        this.subscriptionExpiryDate = null;
 
-        SubscriptionCanceled subscriptionCanceled = new SubscriptionCanceled(
-            this
-        );
-        subscriptionCanceled.publishAfterCommit();
+        SubscriptionCanceled event = new SubscriptionCanceled(this);
+        event.publishAfterCommit();
     }
-
     //>>> Clean Arch / Port Method
 
-    //<<< Clean Arch / Port Method
-    public static void subscribe(SubscriptionRequested subscriptionRequested) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
+    public static void subscribe(SubscriptionRequested event) {
         Subscription subscription = new Subscription();
+        subscription.setUserId(event.getUserId());
+        subscription.setSubscriptionStatus("SUBSCRIBED");
+        subscription.setSubscriptionExpiryDate(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30));
+
         repository().save(subscription);
 
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(subscriptionRequested.get???()).ifPresent(subscription->{
-            
-            subscription // do something
-            repository().save(subscription);
-
-
-         });
-        */
-
+        SubscriptionRegistered registered = new SubscriptionRegistered(subscription);
+        registered.publishAfterCommit();
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public static void checkSubscription(BookViewed bookViewed) {
-        //implement business logic here:
+    public static void subscriptionCancel(SubscriptionCancelRequested event) {
+        repository().findByUserId(event.getUserId()).ifPresent(subscription -> {
+            subscription.setSubscriptionStatus("CANCELED");
+            subscription.setSubscriptionExpiryDate(null);
 
-        /** Example 1:  new item 
-        Subscription subscription = new Subscription();
-        repository().save(subscription);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(bookViewed.get???()).ifPresent(subscription->{
-            
-            subscription // do something
             repository().save(subscription);
 
-
-         });
-        */
-
+            SubscriptionCanceled canceled = new SubscriptionCanceled(subscription);
+            canceled.publishAfterCommit();
+        });
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public static void subscriptionCancel(
-        SubscriptionCancelRequested subscriptionCancelRequested
-    ) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Subscription subscription = new Subscription();
-        repository().save(subscription);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(subscriptionCancelRequested.get???()).ifPresent(subscription->{
-            
-            subscription // do something
-            repository().save(subscription);
-
-
-         });
-        */
-
+    public static void checkSubscription(BookViewed event) {
+        repository().findByUserId(event.getWriterId()).ifPresent(subscription -> {
+            if ("SUBSCRIBED".equals(subscription.getSubscriptionStatus())) {
+                BookAccessGranted granted = new BookAccessGranted(subscription);
+                granted.setBookId(event.getBookId());
+                granted.publishAfterCommit();
+            } else {
+                BookAccessDenied denied = new BookAccessDenied(subscription);
+                denied.setBookId(event.getBookId());
+                denied.publishAfterCommit();
+            }
+        });
     }
-    //>>> Clean Arch / Port Method
-
 }
-//>>> DDD / Aggregate Root
