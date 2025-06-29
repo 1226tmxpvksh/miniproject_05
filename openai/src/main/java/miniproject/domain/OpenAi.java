@@ -1,91 +1,46 @@
 package miniproject.domain;
 
-import miniproject.OpenaiApplication;
-import javax.persistence.*;
-import java.util.List;
 import lombok.Data;
-import java.util.Date;
-import java.time.LocalDate;
-import java.util.Map;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
+import miniproject.OpenaiApplication;
+import miniproject.infra.AbstractEvent;
 
+import javax.persistence.*;
 
 @Entity
-@Table(name="OpenAi_table")
+@Table(name = "OpenAi_table")
 @Data
-
-//<<< DDD / Aggregate Root
-public class OpenAi  {
+public class OpenAi {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    
-    
-    
-private Long requestId;    
-    
-    
-private Long bookId;    
-    
-    
-private String prompt;    
-    
-    
-private String coverUrl;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long requestId;
 
+    private Long bookId;
+    private String prompt;
+    private String coverUrl;
 
-    public static OpenAiRepository repository(){
-        OpenAiRepository openAiRepository = OpenaiApplication.applicationContext.getBean(OpenAiRepository.class);
-        return openAiRepository;
+    public static OpenAiRepository repository() {
+        return OpenaiApplication.applicationContext.getBean(OpenAiRepository.class);
     }
 
-
-
-//<<< Clean Arch / Port Method
-    public void bookCoverCreate(BookCoverCreateCommand bookCoverCreateCommand){
-        
-        //implement business logic here:
-        
-
-        miniproject.external.OpenAiQuery openAiQuery = new miniproject.external.OpenAiQuery();
-        // openAiQuery.set??()        
-          = OpenAiApplication.applicationContext
-            .getBean(miniproject.external.Service.class)
-            .openAi(openAiQuery);
-
-        CoverCreated coverCreated = new CoverCreated(this);
-        coverCreated.publishAfterCommit();
-    }
-//>>> Clean Arch / Port Method
-
-//<<< Clean Arch / Port Method
-    public static void coverGenerationRequested(CoverGenerationRequested coverGenerationRequested){
-        
-        //implement business logic here:
-        
-        /** Example 1:  new item 
+    // ✅ CoverGenerationRequested 이벤트 수신 시 처리 로직
+    public static void coverGenerationRequested(CoverGenerationRequested event) {
         OpenAi openAi = new OpenAi();
+        openAi.setBookId(event.getBookId());
+
+        // prompt 생성: 책 제목 + 내용으로 AI 요청 구성
+        String prompt = "Generate a book cover for: " + event.getTitle() + " - " + event.getContent();
+        openAi.setPrompt(prompt);
+
+        // 표지 생성: 실제 AI API 연동이 없는 경우 임의 값 생성
+        String coverUrl = "https://fake-cover.com/image/" + event.getBookId() + ".png";
+        openAi.setCoverUrl(coverUrl);
+
+        // 저장
         repository().save(openAi);
 
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(coverGenerationRequested.get???()).ifPresent(openAi->{
-            
-            openAi // do something
-            repository().save(openAi);
-
-
-         });
-        */
-
-        
+        // 이벤트 발행
+        CoverCreated coverCreated = new CoverCreated(openAi);
+        coverCreated.publishAfterCommit();
     }
-//>>> Clean Arch / Port Method
-
-
 }
-//>>> DDD / Aggregate Root

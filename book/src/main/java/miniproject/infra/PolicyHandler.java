@@ -1,41 +1,27 @@
 package miniproject.infra;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.naming.NameParser;
-import javax.naming.NameParser;
-import javax.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import miniproject.config.kafka.KafkaProcessor;
-import miniproject.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import miniproject.domain.Book;
+import miniproject.domain.CoverCreated;
+import miniproject.domain.PubApproved;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
+import javax.transaction.Transactional;
 
-//<<< Clean Arch / Inbound Adaptor
+@Slf4j
 @Service
 @Transactional
 public class PolicyHandler {
-
-    @Autowired
-    BookRepository bookRepository;
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whatever(@Payload String eventString) {}
 
     @StreamListener(
         value = KafkaProcessor.INPUT,
         condition = "headers['type']=='PubApproved'"
     )
-    public void wheneverPubApproved_PublishComplete(
-        @Payload PubApproved pubApproved
-    ) {
-        PubApproved event = pubApproved;
-        System.out.println(
-            "\n\n##### listener PublishComplete : " + pubApproved + "\n\n"
-        );
-
-        // Sample Logic //
+    public void wheneverPubApproved(@Payload PubApproved event) {
+        if (event == null || event.getBookId() == null) return;
+        log.info("📩 [PolicyHandler] PubApproved 수신됨: {}", event);
         Book.publishComplete(event);
     }
 
@@ -43,16 +29,9 @@ public class PolicyHandler {
         value = KafkaProcessor.INPUT,
         condition = "headers['type']=='CoverCreated'"
     )
-    public void wheneverCoverCreated_CoverCandidatesReady(
-        @Payload CoverCreated coverCreated
-    ) {
-        CoverCreated event = coverCreated;
-        System.out.println(
-            "\n\n##### listener CoverCandidatesReady : " + coverCreated + "\n\n"
-        );
-
-        // Sample Logic //
+    public void wheneverCoverCreated(@Payload CoverCreated event) {
+        if (event == null || event.getBookId() == null) return;
+        log.info("📩 [PolicyHandler] CoverCreated 수신됨: {}", event);
         Book.coverCandidatesReady(event);
     }
-}
-//>>> Clean Arch / Inbound Adaptor
+} 

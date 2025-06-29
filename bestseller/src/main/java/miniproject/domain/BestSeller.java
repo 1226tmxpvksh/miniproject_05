@@ -1,3 +1,10 @@
+package miniproject.domain;
+
+import lombok.*;
+import javax.persistence.*;
+import java.util.Date;
+import miniproject.BestsellerApplication;
+
 @Entity
 @Table(name = "BestSeller_table")
 @Data
@@ -7,12 +14,9 @@ public class BestSeller {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long bestsellerId;
 
-    private Long bookId; // Long으로 변경
-
+    private Long bookId;
     private Integer viewCount = 0;
-
     private String selectedStatus = "일반도서";
-
     private Date selectedAt;
 
     public static BestSellerRepository repository() {
@@ -38,6 +42,7 @@ public class BestSeller {
         event.publishAfterCommit();
     }
 
+    // 📘 이벤트 1: BookAccessGranted 발생 시 호출
     public static void viewCount(BookAccessGranted event) {
         repository().findByBookId(event.getBookId()).ifPresentOrElse(bestSeller -> {
             bestSeller.increaseBookView(new IncreaseBookViewCommand(event.getBookId()));
@@ -53,7 +58,8 @@ public class BestSeller {
         });
     }
 
+    // 📘 이벤트 2: PointDeducted 발생 시 (현재는 아무 로직 없음)
     public static void viewCount(PointDeducted event) {
-        // 비어 있어도 괜찮음
+        // no-op
     }
 }

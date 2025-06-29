@@ -1,44 +1,26 @@
 package miniproject.infra;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.naming.NameParser;
-import javax.naming.NameParser;
-import javax.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import miniproject.config.kafka.KafkaProcessor;
-import miniproject.domain.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import miniproject.domain.CoverGenerationRequested;
+import miniproject.domain.OpenAi;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
+import javax.transaction.Transactional;
 
-//<<< Clean Arch / Inbound Adaptor
+@Slf4j
 @Service
 @Transactional
 public class PolicyHandler {
-
-    @Autowired
-    OpenAiRepository openAiRepository;
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void whatever(@Payload String eventString) {}
 
     @StreamListener(
         value = KafkaProcessor.INPUT,
         condition = "headers['type']=='CoverGenerationRequested'"
     )
-    public void wheneverCoverGenerationRequested_CoverGenerationRequested(
-        @Payload CoverGenerationRequested coverGenerationRequested
-    ) {
-        CoverGenerationRequested event = coverGenerationRequested;
-        System.out.println(
-            "\n\n##### listener CoverGenerationRequested : " +
-            coverGenerationRequested +
-            "\n\n"
-        );
-
-        // Sample Logic //
+    public void wheneverCoverGenerationRequested(@Payload CoverGenerationRequested event) {
+        if (event == null || event.getBookId() == null) return;
+        log.info("📩 [PolicyHandler] CoverGenerationRequested 수신됨: {}", event);
         OpenAi.coverGenerationRequested(event);
     }
 }
-//>>> Clean Arch / Inbound Adaptor

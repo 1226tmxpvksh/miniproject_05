@@ -4,16 +4,13 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import miniproject.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-//<<< Clean Arch / Inbound Adaptor
-
+@Slf4j
 @RestController
-// @RequestMapping(value="/bestSellers")
 @Transactional
 public class BestSellerController {
 
@@ -31,15 +28,13 @@ public class BestSellerController {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        System.out.println("##### /bestSeller/increaseBookView  called #####");
-        Optional<BestSeller> optionalBestSeller = bestSellerRepository.findById(
-            id
-        );
+        log.info("##### /bestSeller/increaseBookView  called #####");
 
-        optionalBestSeller.orElseThrow(() -> new Exception("No Entity Found"));
-        BestSeller bestSeller = optionalBestSeller.get();
+        BestSeller bestSeller = bestSellerRepository
+            .findById(id)
+            .orElseThrow(() -> new Exception("BestSeller not found: id = " + id));
+
         bestSeller.increaseBookView(increaseBookViewCommand);
-
         bestSellerRepository.save(bestSeller);
         return bestSeller;
     }
@@ -55,17 +50,14 @@ public class BestSellerController {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        System.out.println("##### /bestSeller/selectBestSeller  called #####");
-        Optional<BestSeller> optionalBestSeller = bestSellerRepository.findById(
-            id
-        );
+        log.info("##### /bestSeller/selectBestSeller  called #####");
 
-        optionalBestSeller.orElseThrow(() -> new Exception("No Entity Found"));
-        BestSeller bestSeller = optionalBestSeller.get();
+        BestSeller bestSeller = bestSellerRepository
+            .findById(id)
+            .orElseThrow(() -> new Exception("BestSeller not found: id = " + id));
+
         bestSeller.selectBestSeller(selectBestSellerCommand);
-
         bestSellerRepository.save(bestSeller);
         return bestSeller;
     }
 }
-//>>> Clean Arch / Inbound Adaptor
