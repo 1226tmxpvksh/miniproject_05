@@ -1,112 +1,59 @@
-package miniproject.domain;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.*;
-import lombok.Data;
-import miniproject.BestsellerApplication;
-
 @Entity
 @Table(name = "BestSeller_table")
 @Data
-//<<< DDD / Aggregate Root
 public class BestSeller {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long bestsellerId;
 
-    private String bookId;
+    private Long bookId; // Long으로 변경
 
-    private Integer viewCount;
+    private Integer viewCount = 0;
 
-    private String selectedStatus;
+    private String selectedStatus = "일반도서";
 
     private Date selectedAt;
 
     public static BestSellerRepository repository() {
-        BestSellerRepository bestSellerRepository = BestsellerApplication.applicationContext.getBean(
-            BestSellerRepository.class
-        );
-        return bestSellerRepository;
+        return BestsellerApplication.applicationContext.getBean(BestSellerRepository.class);
     }
 
-    //<<< Clean Arch / Port Method
-    public void increaseBookView(
-        IncreaseBookViewCommand increaseBookViewCommand
-    ) {
-        //implement business logic here:
+    public void increaseBookView(IncreaseBookViewCommand cmd) {
+        this.viewCount += 1;
 
         BookViewIncreased bookViewIncreased = new BookViewIncreased(this);
         bookViewIncreased.publishAfterCommit();
+
+        if (this.viewCount >= 100 && !"베스트셀러".equals(this.selectedStatus)) {
+            this.selectBestSeller(new SelectBestSellerCommand(this.bookId));
+        }
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public void selectBestSeller(
-        SelectBestSellerCommand selectBestSellerCommand
-    ) {
-        //implement business logic here:
+    public void selectBestSeller(SelectBestSellerCommand cmd) {
+        this.selectedStatus = "베스트셀러";
+        this.selectedAt = new Date();
 
-        BestsellerSelected bestsellerSelected = new BestsellerSelected(this);
-        bestsellerSelected.publishAfterCommit();
+        BestsellerSelected event = new BestsellerSelected(this);
+        event.publishAfterCommit();
     }
 
-    //>>> Clean Arch / Port Method
-
-    //<<< Clean Arch / Port Method
-    public static void viewCount(BookAccessGranted bookAccessGranted) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        BestSeller bestSeller = new BestSeller();
-        repository().save(bestSeller);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(bookAccessGranted.get???()).ifPresent(bestSeller->{
-            
-            bestSeller // do something
+    public static void viewCount(BookAccessGranted event) {
+        repository().findByBookId(event.getBookId()).ifPresentOrElse(bestSeller -> {
+            bestSeller.increaseBookView(new IncreaseBookViewCommand(event.getBookId()));
             repository().save(bestSeller);
+        }, () -> {
+            BestSeller newBook = new BestSeller();
+            newBook.setBookId(event.getBookId());
+            newBook.setViewCount(1);
+            repository().save(newBook);
 
-
-         });
-        */
-
+            BookViewIncreased event1 = new BookViewIncreased(newBook);
+            event1.publishAfterCommit();
+        });
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public static void viewCount(PointDeducted pointDeducted) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        BestSeller bestSeller = new BestSeller();
-        repository().save(bestSeller);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(pointDeducted.get???()).ifPresent(bestSeller->{
-            
-            bestSeller // do something
-            repository().save(bestSeller);
-
-
-         });
-        */
-
+    public static void viewCount(PointDeducted event) {
+        // 비어 있어도 괜찮음
     }
-    //>>> Clean Arch / Port Method
-
 }
-//>>> DDD / Aggregate Root

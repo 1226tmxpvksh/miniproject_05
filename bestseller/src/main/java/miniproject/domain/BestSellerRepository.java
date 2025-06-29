@@ -1,17 +1,15 @@
 package miniproject.domain;
 
-import java.util.Date;
-import java.util.List;
-import miniproject.domain.*;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
+import java.util.Optional;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-//<<< PoEAA / Repository
 @RepositoryRestResource(
     collectionResourceRel = "bestSellers",
     path = "bestSellers"
 )
-public interface BestSellerRepository
-    extends PagingAndSortingRepository<BestSeller, Long> {}
+public interface BestSellerRepository extends PagingAndSortingRepository<BestSeller, Long> {
+
+    // ✅ 도서 ID 기준 조회 메서드 추가
+    Optional<BestSeller> findByBookId(Long bookId);
+}

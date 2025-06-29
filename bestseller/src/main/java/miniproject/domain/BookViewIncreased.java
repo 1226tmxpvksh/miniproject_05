@@ -1,12 +1,8 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
-import java.util.*;
 import lombok.*;
-import miniproject.domain.*;
 import miniproject.infra.AbstractEvent;
 
-//<<< DDD / Domain Event
 @Data
 @ToString
 public class BookViewIncreased extends AbstractEvent {
@@ -16,10 +12,11 @@ public class BookViewIncreased extends AbstractEvent {
 
     public BookViewIncreased(BestSeller aggregate) {
         super(aggregate);
+        this.bookId = aggregate.getBookId();       // Long 타입
+        this.viewCount = aggregate.getViewCount();
     }
 
     public BookViewIncreased() {
         super();
     }
 }
-//>>> DDD / Domain Event
