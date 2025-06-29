@@ -17,67 +17,71 @@ public class BookDetailInfoViewHandler {
     @Autowired
     private BookDetailInfoRepository bookDetailInfoRepository;
 
+    // 도서 작성 시 상세 정보 생성
     @StreamListener(KafkaProcessor.INPUT)
-    public void whenWritten_then_CREATE(@Payload Written written) {
+    public void whenWritten_then_CREATE(@Payload Written event) {
         try {
-            if (!written.validate()) return;
+            if (!event.validate()) return;
 
-            BookDetailInfo bookDetailInfo = new BookDetailInfo();
-            bookDetailInfo.setBookId(written.getBookId());
-            bookDetailInfo.setTitle(written.getTitle());
-            bookDetailInfo.setContent(written.getContent());
-            bookDetailInfo.setWriterId(written.getWriterId());
+            BookDetailInfo view = new BookDetailInfo();
+            view.setBookId(event.getBookId());
+            view.setTitle(event.getTitle());
+            view.setContent(event.getContent());
+            view.setWriterId(event.getWriterId());
+            view.setWriterNickname(event.getWriterNickname());
+            view.setViewCount(0); // 기본값 설정
 
-            bookDetailInfoRepository.save(bookDetailInfo);
+            bookDetailInfoRepository.save(view);
         } catch (Exception e) {
             log.error("❌ Error in whenWritten_then_CREATE", e);
         }
     }
 
+    // 표지 선택 시 표지 URL 업데이트
     @StreamListener(KafkaProcessor.INPUT)
     public void whenBookCoverSelected_then_UPDATE(@Payload BookCoverSelected event) {
         try {
             if (!event.validate()) return;
-            Optional<BookDetailInfo> optional = bookDetailInfoRepository.findById(event.getBookId());
-            if (optional.isPresent()) {
-                BookDetailInfo view = optional.get();
+            bookDetailInfoRepository.findById(event.getBookId()).ifPresent(view -> {
                 view.setCoverUrl(event.getCoverUrl());
                 bookDetailInfoRepository.save(view);
-            }
+            });
         } catch (Exception e) {
             log.error("❌ Error in whenBookCoverSelected_then_UPDATE", e);
         }
     }
 
+    // 조회수 증가 이벤트 처리
     @StreamListener(KafkaProcessor.INPUT)
-    public void whenBookViewIncreased_then_UPDATE(@Payload BookViewIncreased event) {
+    public void whenBookViewed_then_UPDATE(@Payload BookViewed event) {
         try {
             if (!event.validate()) return;
-            Optional<BookDetailInfo> optional = bookDetailInfoRepository.findById(event.getBookId());
-            if (optional.isPresent()) {
-                BookDetailInfo view = optional.get();
-                view.setViewCount(event.getViewCount());
+            bookDetailInfoRepository.findById(event.getBookId()).ifPresent(view -> {
+                int current = view.getViewCount() != null ? view.getViewCount() : 0;
+                view.setViewCount(current + 1);
                 bookDetailInfoRepository.save(view);
-            }
+            });
         } catch (Exception e) {
-            log.error("❌ Error in whenBookViewIncreased_then_UPDATE", e);
+            log.error("❌ Error in whenBookViewed_then_UPDATE", e);
         }
     }
 
+    // 회원 닉네임 변경 시 반영
     @StreamListener(KafkaProcessor.INPUT)
     public void whenRegistered_then_UPDATE(@Payload Registered event) {
         try {
             if (!event.validate()) return;
-            List<BookDetailInfo> books = bookDetailInfoRepository.findAllByWriterId(event.getUserId());
-            for (BookDetailInfo book : books) {
-                book.setWriterNickname(event.getNickname());
-                bookDetailInfoRepository.save(book);
+            List<BookDetailInfo> books = bookDetailInfoRepository.findByWriterId(event.getUserId());
+            for (BookDetailInfo view : books) {
+                view.setWriterNickname(event.getNickname());
+                bookDetailInfoRepository.save(view);
             }
         } catch (Exception e) {
             log.error("❌ Error in whenRegistered_then_UPDATE", e);
         }
     }
 
+    // 도서 삭제 처리
     @StreamListener(KafkaProcessor.INPUT)
     public void whenDeleted_then_DELETE(@Payload Deleted event) {
         try {

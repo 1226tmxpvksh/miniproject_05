@@ -17,6 +17,7 @@ public class BookListViewHandler {
     @Autowired
     private BookListRepository bookListRepository;
 
+    // 출간 완료 → 뷰 모델 생성
     @StreamListener(KafkaProcessor.INPUT)
     public void whenPublishCompleted_then_CREATE(@Payload PublishCompleted event) {
         try {
@@ -26,7 +27,7 @@ public class BookListViewHandler {
             view.setBookId(event.getBookId());
             view.setTitle(event.getTitle());
             view.setCoverUrl(event.getCoverUrl());
-            view.setViewCount(0);
+            view.setViewCount(0); // 초기 조회수
             view.setWriterId(event.getWriterId());
             view.setWriterNickname(event.getWriterNickname());
 
@@ -36,14 +37,16 @@ public class BookListViewHandler {
         }
     }
 
+    // 도서 열람 → 조회수 증가
     @StreamListener(KafkaProcessor.INPUT)
     public void whenBookViewed_then_UPDATE(@Payload BookViewed event) {
         try {
             if (!event.validate()) return;
+
             Optional<BookList> optional = bookListRepository.findByBookId(event.getBookId());
             if (optional.isPresent()) {
                 BookList view = optional.get();
-                view.setViewCount(view.getViewCount() + 1);
+                view.setViewCount(view.getViewCount() + 1); // ✅ 조회수 증가
                 bookListRepository.save(view);
             }
         } catch (Exception e) {
@@ -51,10 +54,12 @@ public class BookListViewHandler {
         }
     }
 
+    // 사용자 닉네임 변경 → writerNickname 업데이트
     @StreamListener(KafkaProcessor.INPUT)
     public void whenRegistered_then_UPDATE(@Payload Registered event) {
         try {
             if (!event.validate()) return;
+
             List<BookList> views = bookListRepository.findByWriterId(event.getUserId());
             for (BookList view : views) {
                 view.setWriterNickname(event.getNickname());
