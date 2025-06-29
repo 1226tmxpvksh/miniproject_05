@@ -26,6 +26,12 @@ public class User {
 
     private Integer amount;
 
+    private Boolean isSubscribed = false;
+
+    private Date subscriptionStart;
+
+    private Date subscriptionEnd;
+
     public static UserRepository repository() {
         UserRepository userRepository = UserApplication.applicationContext.getBean(
             UserRepository.class
@@ -35,53 +41,54 @@ public class User {
 
     //<<< Clean Arch / Port Method
     public void register(RegisterCommand registerCommand) {
-        //implement business logic here:
+        this.email = registerCommand.getEmail();
+        this.nickname = registerCommand.getNickname();
+        this.amount = 0;
+        this.isSubscribed = false;
 
         Registered registered = new Registered(this);
         registered.publishAfterCommit();
     }
-
     //>>> Clean Arch / Port Method
+
     //<<< Clean Arch / Port Method
     public void subscribe(SubscribeCommand subscribeCommand) {
-        //implement business logic here:
+        this.isSubscribed = true;
+        this.subscriptionStart = new Date();
 
-        SubscriptionRequested subscriptionRequested = new SubscriptionRequested(
-            this
-        );
+        // 기본 30일 구독 예시
+        Date end = new Date();
+        end.setTime(this.subscriptionStart.getTime() + (1000L * 60 * 60 * 24 * 30));
+        this.subscriptionEnd = end;
+
+        SubscriptionRequested subscriptionRequested = new SubscriptionRequested(this);
         subscriptionRequested.publishAfterCommit();
     }
-
     //>>> Clean Arch / Port Method
+
     //<<< Clean Arch / Port Method
     public void writerQuest(WriterQuestCommand writerQuestCommand) {
-        //implement business logic here:
-
         WriterRequest writerRequest = new WriterRequest(this);
         writerRequest.publishAfterCommit();
     }
-
     //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public void cancelSubscription(
-        CancelSubscriptionCommand cancelSubscriptionCommand
-    ) {
-        //implement business logic here:
 
-        SubscriptionCancelRequested subscriptionCancelRequested = new SubscriptionCancelRequested(
-            this
-        );
+    //<<< Clean Arch / Port Method
+    public void cancelSubscription(CancelSubscriptionCommand cancelSubscriptionCommand) {
+        this.isSubscribed = false;
+        this.subscriptionStart = null;
+        this.subscriptionEnd = null;
+
+        SubscriptionCancelRequested subscriptionCancelRequested = new SubscriptionCancelRequested(this);
         subscriptionCancelRequested.publishAfterCommit();
     }
-
     //>>> Clean Arch / Port Method
+
     //<<< Clean Arch / Port Method
     public void chargePoint(ChargePointCommand chargePointCommand) {
-        //implement business logic here:
+        this.amount += chargePointCommand.getAmount();
 
-        PointChargeRequested pointChargeRequested = new PointChargeRequested(
-            this
-        );
+        PointChargeRequested pointChargeRequested = new PointChargeRequested(this);
         pointChargeRequested.publishAfterCommit();
     }
     //>>> Clean Arch / Port Method

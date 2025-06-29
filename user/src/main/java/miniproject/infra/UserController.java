@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 //<<< Clean Arch / Inbound Adaptor
 
 @RestController
-// @RequestMapping(value="/users")
 @Transactional
 public class UserController {
 
@@ -21,21 +20,17 @@ public class UserController {
     UserRepository userRepository;
 
     @RequestMapping(
-        value = "/users/{id}/register",
-        method = RequestMethod.PUT,
+        value = "/users/register",
+        method = RequestMethod.POST,
         produces = "application/json;charset=UTF-8"
     )
     public User register(
-        @PathVariable(value = "id") Long id,
-        @RequestBody RegisterCommand registerCommand,
         HttpServletRequest request,
-        HttpServletResponse response
+        HttpServletResponse response,
+        @RequestBody RegisterCommand registerCommand
     ) throws Exception {
         System.out.println("##### /user/register  called #####");
-        Optional<User> optionalUser = userRepository.findById(id);
-
-        optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
-        User user = optionalUser.get();
+        User user = new User();
         user.register(registerCommand);
 
         userRepository.save(user);

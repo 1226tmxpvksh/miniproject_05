@@ -1,11 +1,12 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
 import java.util.*;
 import lombok.Data;
 
 @Data
 public class CancelSubscriptionCommand {
 
-    private String userId;
+    private Long userId;
+    private Boolean isSubscribed;         // false로 설정됨
+    private Date subscriptionEnd;         // 해지일자
 }

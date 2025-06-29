@@ -9,20 +9,26 @@ import miniproject.infra.AbstractEvent;
 //<<< DDD / Domain Event
 @Data
 @ToString
+@NoArgsConstructor
 public class SubscriptionRequested extends AbstractEvent {
 
     private Long userId;
     private String email;
     private String nickname;
-    private Boolean subscribed;
+    private Boolean isSubscribed;
+    private Date subscriptionStart;
+    private Date subscriptionEnd;
     private Boolean writerRequested;
 
     public SubscriptionRequested(User aggregate) {
         super(aggregate);
-    }
-
-    public SubscriptionRequested() {
-        super();
+        this.userId = aggregate.getUserId();
+        this.email = aggregate.getEmail();
+        this.nickname = aggregate.getNickname();
+        this.isSubscribed = aggregate.getIsSubscribed();
+        this.subscriptionStart = aggregate.getSubscriptionStart();
+        this.subscriptionEnd = aggregate.getSubscriptionEnd();
+        this.writerRequested = false; // 혹은 aggregate.getWriterRequested() 값이 있다면 반영
     }
 }
 //>>> DDD / Domain Event

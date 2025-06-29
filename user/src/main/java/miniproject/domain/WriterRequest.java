@@ -9,16 +9,22 @@ import miniproject.infra.AbstractEvent;
 //<<< DDD / Domain Event
 @Data
 @ToString
+@NoArgsConstructor
 public class WriterRequest extends AbstractEvent {
 
     private Long userId;
+    private String email;
+    private String nickname;
+    private Boolean writerRequested;
+    private Date writerRequestedAt;
 
     public WriterRequest(User aggregate) {
         super(aggregate);
-    }
-
-    public WriterRequest() {
-        super();
+        this.userId = aggregate.getUserId();
+        this.email = aggregate.getEmail();
+        this.nickname = aggregate.getNickname();
+        this.writerRequested = aggregate.getWriterRequested();
+        this.writerRequestedAt = aggregate.getWriterRequestedAt();
     }
 }
 //>>> DDD / Domain Event
