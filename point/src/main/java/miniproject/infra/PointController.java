@@ -7,61 +7,46 @@ import javax.transaction.Transactional;
 import miniproject.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-//<<< Clean Arch / Inbound Adaptor
 
 @RestController
-// @RequestMapping(value="/points")
+@RequestMapping("/points")
 @Transactional
 public class PointController {
 
     @Autowired
     PointRepository pointRepository;
 
-    @RequestMapping(
-        value = "/points/{id}/deductpoint",
-        method = RequestMethod.PUT,
-        produces = "application/json;charset=UTF-8"
-    )
+    @PutMapping("/{id}/deductpoint")
     public Point deductPoint(
-        @PathVariable(value = "id") Long id,
-        @RequestBody DeductPointCommand deductPointCommand,
+        @PathVariable("id") Long id,
+        @RequestBody DeductPointCommand command,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        System.out.println("##### /point/deductPoint  called #####");
-        Optional<Point> optionalPoint = pointRepository.findById(id);
+        System.out.println("##### /points/{id}/deductpoint called #####");
 
-        optionalPoint.orElseThrow(() -> new Exception("No Entity Found"));
-        Point point = optionalPoint.get();
-        point.deductPoint(deductPointCommand);
+        Point point = pointRepository.findById(id)
+            .orElseThrow(() -> new Exception("No Entity Found"));
 
+        point.deductPoint(command);
         pointRepository.save(point);
         return point;
     }
 
-    @RequestMapping(
-        value = "/points/{id}/chargepoint",
-        method = RequestMethod.PUT,
-        produces = "application/json;charset=UTF-8"
-    )
+    @PutMapping("/{id}/chargepoint")
     public Point chargePoint(
-        @PathVariable(value = "id") Long id,
-        @RequestBody ChargePointCommand chargePointCommand,
+        @PathVariable("id") Long id,
+        @RequestBody ChargePointCommand command,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
-        System.out.println("##### /point/chargePoint  called #####");
-        Optional<Point> optionalPoint = pointRepository.findById(id);
+        System.out.println("##### /points/{id}/chargepoint called #####");
 
-        optionalPoint.orElseThrow(() -> new Exception("No Entity Found"));
-        Point point = optionalPoint.get();
-        point.chargePoint(chargePointCommand);
+        Point point = pointRepository.findById(id)
+            .orElseThrow(() -> new Exception("No Entity Found"));
 
+        point.chargePoint(command);
         pointRepository.save(point);
         return point;
     }
 }
-//>>> Clean Arch / Inbound Adaptor

@@ -1,12 +1,8 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
-import java.util.*;
 import lombok.*;
-import miniproject.domain.*;
 import miniproject.infra.AbstractEvent;
 
-//<<< DDD / Domain Event
 @Data
 @ToString
 public class PointChargeFailed extends AbstractEvent {
@@ -22,4 +18,3 @@ public class PointChargeFailed extends AbstractEvent {
         super();
     }
 }
-//>>> DDD / Domain Event

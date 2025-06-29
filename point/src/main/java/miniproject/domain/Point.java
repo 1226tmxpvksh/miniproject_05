@@ -1,11 +1,6 @@
 package miniproject.domain;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import javax.persistence.*;
 import lombok.Data;
 import miniproject.PointApplication;
@@ -13,7 +8,6 @@ import miniproject.PointApplication;
 @Entity
 @Table(name = "Point_table")
 @Data
-//<<< DDD / Aggregate Root
 public class Point {
 
     @Id
@@ -23,84 +17,55 @@ public class Point {
     private Integer amount;
 
     public static PointRepository repository() {
-        PointRepository pointRepository = PointApplication.applicationContext.getBean(
-            PointRepository.class
-        );
-        return pointRepository;
+        return PointApplication.applicationContext.getBean(PointRepository.class);
     }
 
-    //<<< Clean Arch / Port Method
-    public void deductPoint(DeductPointCommand deductPointCommand) {
-        //implement business logic here:
+    // 포인트 차감 로직
+    public void deductPoint(DeductPointCommand command) {
+        if (this.amount != null && this.amount >= command.getAmount()) {
+            this.amount -= command.getAmount();
 
-        PointDeducted pointDeducted = new PointDeducted(this);
-        pointDeducted.publishAfterCommit();
-        PointDeductFailed pointDeductFailed = new PointDeductFailed(this);
-        pointDeductFailed.publishAfterCommit();
+            PointDeducted event = new PointDeducted(this);
+            event.setAmount(command.getAmount());
+            event.publishAfterCommit();
+        } else {
+            PointDeductFailed event = new PointDeductFailed(this);
+            event.setReason("잔액 부족");
+            event.publishAfterCommit();
+        }
     }
 
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public void chargePoint(ChargePointCommand chargePointCommand) {
-        //implement business logic here:
+    // 포인트 충전 로직
+    public void chargePoint(ChargePointCommand command) {
+        if (command.getAmount() > 0) {
+            if (this.amount == null) this.amount = 0;
+            this.amount += command.getAmount();
 
-        PointCharged pointCharged = new PointCharged(this);
-        pointCharged.publishAfterCommit();
-        PointChargeFailed pointChargeFailed = new PointChargeFailed(this);
-        pointChargeFailed.publishAfterCommit();
+            PointCharged event = new PointCharged(this);
+            event.setAmount(command.getAmount());
+            event.publishAfterCommit();
+        } else {
+            PointChargeFailed event = new PointChargeFailed(this);
+            event.setReason("충전 금액 오류");
+            event.publishAfterCommit();
+        }
     }
 
-    //>>> Clean Arch / Port Method
+    // BookAccessDenied 이벤트 수신 후 포인트 확인
+    public static void checkPoint(BookAccessDenied event) {
+        repository().findById(event.getUserId()).ifPresent(point -> {
+            PointInfoCheck check = new PointInfoCheck(point);
+            check.publishAfterCommit();
+        });
+    }
 
-    //<<< Clean Arch / Port Method
-    public static void checkPoint(BookAccessDenied bookAccessDenied) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Point point = new Point();
-        repository().save(point);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(bookAccessDenied.get???()).ifPresent(point->{
-            
-            point // do something
+    // 외부에서 충전 요청 이벤트 수신
+    public static void chargePoint(PointChargeRequested event) {
+        repository().findById(event.getUserId()).ifPresent(point -> {
+            ChargePointCommand cmd = new ChargePointCommand();
+            cmd.setAmount(event.getAmount());
+            point.chargePoint(cmd);
             repository().save(point);
-
-
-         });
-        */
-
+        });
     }
-
-    //>>> Clean Arch / Port Method
-    //<<< Clean Arch / Port Method
-    public static void chargePoint(PointChargeRequested pointChargeRequested) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Point point = new Point();
-        repository().save(point);
-
-        */
-
-        /** Example 2:  finding and process
-        
-
-        repository().findById(pointChargeRequested.get???()).ifPresent(point->{
-            
-            point // do something
-            repository().save(point);
-
-
-         });
-        */
-
-    }
-    //>>> Clean Arch / Port Method
-
 }
-//>>> DDD / Aggregate Root
