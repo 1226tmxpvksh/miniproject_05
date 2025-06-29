@@ -1,26 +1,23 @@
 package miniproject.domain;
 
-import java.util.Date;
 import javax.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-//<<< EDA / CQRS
 @Entity
-@Table(name = "PublicationApprovedManagement_table")
-@Data
+@Getter
+@Setter
 public class PublicationApprovedManagement {
 
     @Id
-    private Long bookId;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
-    private String title;
-    private String content;
-    private String coverUrl;
-    private Long writerId;
-    private String publishStatus;
+    private Long bookId;           // ✅ 이미 쓰고 있던 필드
+    private String title;          // ✅ PublicationApprovedManagementViewHandler에서 사용
+    private String content;        // ✅ "
+    private String coverUrl;       // ✅ "
+    private Long writerId;         // ✅ "
+    private String publishStatus;  // ✅ "
 
-    // Optional: 추가 정보 (정렬/표시용)
-    private Date publishedAt;       // 출간 시간
-    private Integer viewCount;      // 조회수
-    private String selectedStatus;  // 일반도서 / 베스트셀러
+    // 추가 필드가 필요하면 여기에 계속 선언하면 됨
 }
