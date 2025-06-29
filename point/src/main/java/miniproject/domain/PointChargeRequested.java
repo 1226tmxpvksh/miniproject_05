@@ -1,8 +1,6 @@
 package miniproject.domain;
 
-import java.util.*;
 import lombok.*;
-import miniproject.domain.*;
 import miniproject.infra.AbstractEvent;
 
 @Data
@@ -10,5 +8,5 @@ import miniproject.infra.AbstractEvent;
 public class PointChargeRequested extends AbstractEvent {
 
     private Long userId;
-    private String amount;
+    private Integer amount; // ✅ String → Integer 로 변경
 }
