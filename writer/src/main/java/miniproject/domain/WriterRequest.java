@@ -10,4 +10,7 @@ import miniproject.infra.AbstractEvent;
 public class WriterRequest extends AbstractEvent {
 
     private Long userId;
+    private String email;
+    private String nickname;
+    private String approvalStatus = "요청됨"; // 기본 상태
 }

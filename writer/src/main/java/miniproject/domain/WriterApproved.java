@@ -16,6 +16,8 @@ public class WriterApproved extends AbstractEvent {
 
     public WriterApproved(Writer aggregate) {
         super(aggregate);
+        this.writerId = aggregate.getWriterId();
+        this.approvalStatus = aggregate.getApprovalStatus();
     }
 
     public WriterApproved() {

@@ -17,6 +17,9 @@ public class PubRejected extends AbstractEvent {
 
     public PubRejected(Writer aggregate) {
         super(aggregate);
+        this.writerId = aggregate.getWriterId();
+        this.publishStatus = aggregate.getPublishStatus();
+        // bookId는 Writer aggregate에 없다면, 별도로 setBookId()를 통해 주입 필요
     }
 
     public PubRejected() {

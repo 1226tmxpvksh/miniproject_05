@@ -1,9 +1,5 @@
 package miniproject.infra;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import javax.naming.NameParser;
-import javax.naming.NameParser;
 import javax.transaction.Transactional;
 import miniproject.config.kafka.KafkaProcessor;
 import miniproject.domain.*;
@@ -12,7 +8,6 @@ import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
-//<<< Clean Arch / Inbound Adaptor
 @Service
 @Transactional
 public class PolicyHandler {
@@ -21,7 +16,9 @@ public class PolicyHandler {
     WriterRepository writerRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void whatever(@Payload String eventString) {}
+    public void whatever(@Payload String eventString) {
+        // 기본 이벤트 수신 처리 (디버깅용)
+    }
 
     @StreamListener(
         value = KafkaProcessor.INPUT,
@@ -30,13 +27,10 @@ public class PolicyHandler {
     public void wheneverWriterRequest_WriterRequest(
         @Payload WriterRequest writerRequest
     ) {
-        WriterRequest event = writerRequest;
         System.out.println(
             "\n\n##### listener WriterRequest : " + writerRequest + "\n\n"
         );
-
-        // Sample Logic //
-        Writer.writerRequest(event);
+        Writer.writerRequest(writerRequest);
     }
 
     @StreamListener(
@@ -46,13 +40,9 @@ public class PolicyHandler {
     public void wheneverPublishRequested_PublishRequest(
         @Payload PublishRequested publishRequested
     ) {
-        PublishRequested event = publishRequested;
         System.out.println(
             "\n\n##### listener PublishRequest : " + publishRequested + "\n\n"
         );
-
-        // Sample Logic //
-        Writer.publishRequest(event);
+        Writer.publishRequest(publishRequested);
     }
 }
-//>>> Clean Arch / Inbound Adaptor

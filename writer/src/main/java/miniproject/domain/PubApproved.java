@@ -17,6 +17,9 @@ public class PubApproved extends AbstractEvent {
 
     public PubApproved(Writer aggregate) {
         super(aggregate);
+        this.writerId = aggregate.getWriterId();
+        this.publishStatus = aggregate.getPublishStatus();
+        // bookId는 외부에서 별도로 setBookId()로 주입해줘야 할 수 있음
     }
 
     public PubApproved() {

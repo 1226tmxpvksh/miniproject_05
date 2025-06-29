@@ -14,4 +14,7 @@ public class PublishRequested extends AbstractEvent {
     private String content;
     private Long writerId;
     private String coverUrl;
+
+    private String publishStatus = "요청됨";
+    private Date requestedAt = new Date(); // 이벤트 발생 시 시간
 }

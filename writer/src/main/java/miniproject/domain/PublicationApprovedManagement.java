@@ -1,8 +1,6 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
 import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
 import lombok.Data;
 
@@ -13,7 +11,6 @@ import lombok.Data;
 public class PublicationApprovedManagement {
 
     @Id
-    //@GeneratedValue(strategy=GenerationType.AUTO)
     private Long bookId;
 
     private String title;
@@ -21,4 +18,9 @@ public class PublicationApprovedManagement {
     private String coverUrl;
     private Long writerId;
     private String publishStatus;
+
+    // Optional: 추가 정보 (정렬/표시용)
+    private Date publishedAt;       // 출간 시간
+    private Integer viewCount;      // 조회수
+    private String selectedStatus;  // 일반도서 / 베스트셀러
 }
