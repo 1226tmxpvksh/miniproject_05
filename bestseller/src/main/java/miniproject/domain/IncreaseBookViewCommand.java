@@ -1,3 +1,7 @@
+package miniproject.domain;
+
+import lombok.Data;
+
 @Data
 public class IncreaseBookViewCommand {
     private Long bookId;

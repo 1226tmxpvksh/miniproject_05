@@ -4,6 +4,7 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
+
 import lombok.extern.slf4j.Slf4j;
 import miniproject.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +28,16 @@ public class BestSellerController {
         @RequestBody IncreaseBookViewCommand increaseBookViewCommand,
         HttpServletRequest request,
         HttpServletResponse response
-    ) throws Exception {
-        log.info("##### /bestSeller/increaseBookView  called #####");
+    ) {
+        log.info("📈 [PUT] /bestSellers/{}/increasebookview called", id);
 
         BestSeller bestSeller = bestSellerRepository
             .findById(id)
-            .orElseThrow(() -> new Exception("BestSeller not found: id = " + id));
+            .orElseThrow(() -> new RuntimeException("BestSeller not found: id = " + id));
 
         bestSeller.increaseBookView(increaseBookViewCommand);
         bestSellerRepository.save(bestSeller);
+
         return bestSeller;
     }
 
@@ -49,15 +51,16 @@ public class BestSellerController {
         @RequestBody SelectBestSellerCommand selectBestSellerCommand,
         HttpServletRequest request,
         HttpServletResponse response
-    ) throws Exception {
-        log.info("##### /bestSeller/selectBestSeller  called #####");
+    ) {
+        log.info("🏅 [PUT] /bestSellers/{}/selectbestseller called", id);
 
         BestSeller bestSeller = bestSellerRepository
             .findById(id)
-            .orElseThrow(() -> new Exception("BestSeller not found: id = " + id));
+            .orElseThrow(() -> new RuntimeException("BestSeller not found: id = " + id));
 
         bestSeller.selectBestSeller(selectBestSellerCommand);
         bestSellerRepository.save(bestSeller);
+
         return bestSeller;
     }
 }
