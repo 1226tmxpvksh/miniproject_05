@@ -1,6 +1,7 @@
 package miniproject.domain;
 
 import lombok.*;
+import miniproject.domain.Book; // ✅ 요거 추가!
 import miniproject.infra.AbstractEvent;
 
 @Data
