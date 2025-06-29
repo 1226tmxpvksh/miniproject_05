@@ -20,4 +20,6 @@ public class BookViewed extends AbstractEvent {
         this.title = aggregate.getTitle();
         this.content = aggregate.getContent();
         this.writerId = aggregate.getWriterId();
-        this.status = aggr
+        this.status = aggregate.getStatus();
+    }
+}
