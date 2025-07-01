@@ -13,22 +13,11 @@ import miniproject.infra.AbstractEvent;
 public class SubscriptionRequested extends AbstractEvent {
 
     private Long userId;
-    private String email;
-    private String nickname;
-    private Boolean isSubscribed;
-    private Date subscriptionStart;
-    private Date subscriptionEnd;
-    private Boolean writerRequested;
+    private Date requestedAt; // 구독 신청 요청 시각
 
-    public SubscriptionRequested(User aggregate) {
-        super(aggregate);
-        this.userId = aggregate.getUserId();
-        this.email = aggregate.getEmail();
-        this.nickname = aggregate.getNickname();
-        this.isSubscribed = aggregate.getIsSubscribed();
-        this.subscriptionStart = aggregate.getSubscriptionStart();
-        this.subscriptionEnd = aggregate.getSubscriptionEnd();
-        this.writerRequested = false; // 혹은 aggregate.getWriterRequested() 값이 있다면 반영
+    public SubscriptionRequested(Long userId, Date requestedAt) {
+        this.userId = userId;
+        this.requestedAt = requestedAt;
     }
 }
 //>>> DDD / Domain Event

@@ -12,18 +12,10 @@ import miniproject.infra.AbstractEvent;
 public class SubscriptionCancelRequested extends AbstractEvent {
 
     private Long userId;
-    private String email;
-    private String nickname;
-    private Boolean isSubscribed;
-    private Date subscriptionEnd;
+    private Date requestedAt; // 구독취소 신청 요청 시각
 
-    public SubscriptionCancelRequested(User aggregate) {
-        super(aggregate);
-        this.userId = aggregate.getUserId();
-        this.email = aggregate.getEmail();
-        this.nickname = aggregate.getNickname();
-        this.isSubscribed = aggregate.getIsSubscribed();
-        this.subscriptionEnd = aggregate.getSubscriptionEnd();
+    public SubscriptionCancelRequested(Long userId, Date requestedAt) {
+        this.userId = userId;
+        this.requestedAt = requestedAt; 
     }
 }
-//>>> DDD / Domain Event

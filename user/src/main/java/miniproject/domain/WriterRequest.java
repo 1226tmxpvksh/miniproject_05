@@ -13,18 +13,13 @@ import miniproject.infra.AbstractEvent;
 public class WriterRequest extends AbstractEvent {
 
     private Long userId;
-    private String email;
-    private String nickname;
-    private Boolean writerRequested;
-    private Date writerRequestedAt;
+    private Date requestedAt; // WriterQuestCommand의 신청 시각
 
-    public WriterRequest(User aggregate) {
-        super(aggregate);
-        this.userId = aggregate.getUserId();
-        this.email = aggregate.getEmail();
-        this.nickname = aggregate.getNickname();
-        this.writerRequested = aggregate.getWriterRequested();
-        this.writerRequestedAt = aggregate.getWriterRequestedAt();
+    // User 엔티티 WriterQuestCommand를 모두 받아서 생성
+    public WriterRequest(User user, WriterQuestCommand command) {
+        super(user);
+        this.userId = user.getUserId();
+        this.requestedAt = command.getRequestedAt();
     }
 }
 //>>> DDD / Domain Event

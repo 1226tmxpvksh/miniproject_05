@@ -10,4 +10,7 @@ import org.springframework.data.rest.core.annotation.RepositoryRestResource;
     path = "userInfoLists"
 )
 public interface UserInfoListRepository
-    extends PagingAndSortingRepository<UserInfoList, Long> {}
+    extends PagingAndSortingRepository<UserInfoList, Long> {
+    List<UserInfoList> findByEmail(String email);
+    List<UserInfoList> findByNickname(String nickname);
+}

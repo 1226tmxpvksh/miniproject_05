@@ -18,4 +18,5 @@ public class UserInfoList {
 
     private String email;
     private String nickname;
+    private String passwordHash;  //패스워드 해시 추가 (평문 비밀번호 절대 X)
 }

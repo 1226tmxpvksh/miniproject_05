@@ -1,8 +1,5 @@
 package miniproject.infra;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
 import miniproject.config.kafka.KafkaProcessor;
 import miniproject.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +21,12 @@ public class UserInfoListViewHandler {
 
             // view 객체 생성
             UserInfoList userInfoList = new UserInfoList();
-            // view 객체에 이벤트의 Value 를 set 함
+            // 이벤트의 Value를 모두 set
             userInfoList.setUserId(registered.getUserId());
             userInfoList.setEmail(registered.getEmail());
             userInfoList.setNickname(registered.getNickname());
-            // view 레파지 토리에 save
+            userInfoList.setPasswordHash(registered.getPasswordHash()); //패스워드 해시 추가
+
             userInfoListRepository.save(userInfoList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,3 +34,4 @@ public class UserInfoListViewHandler {
     }
     //>>> DDD / CQRS
 }
+

@@ -12,16 +12,12 @@ import miniproject.infra.AbstractEvent;
 public class PointChargeRequested extends AbstractEvent {
 
     private Long userId;
-    private String email;
-    private String nickname;
-    private Integer amount;
+    private Integer amount; // 충전 요청 금액
 
-    public PointChargeRequested(User aggregate) {
-        super(aggregate);
-        this.userId = aggregate.getUserId();
-        this.email = aggregate.getEmail();
-        this.nickname = aggregate.getNickname();
-        this.amount = aggregate.getAmount(); // 혹은 command에서 받은 값
+    // 이벤트 생성시 userId와 amount만 전달
+    public PointChargeRequested(Long userId, Integer amount) {
+        this.userId = userId;
+        this.amount = amount;
     }
 }
 //>>> DDD / Domain Event
