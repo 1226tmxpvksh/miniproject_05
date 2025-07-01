@@ -84,9 +84,11 @@ public class Subscription {
         repository().findByUserId(event.getWriterId()).ifPresent(subscription -> {
             if ("SUBSCRIBED".equals(subscription.getSubscriptionStatus())) {
                 BookAccessGranted granted = new BookAccessGranted(subscription);
+                granted.setBookId(event.getBookId());
                 granted.publishAfterCommit();
             } else {
                 BookAccessDenied denied = new BookAccessDenied(subscription);
+                denied.setBookId(event.getBookId());
                 denied.publishAfterCommit();
             }
         });
