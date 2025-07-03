@@ -1,9 +1,6 @@
 package miniproject.infra;
 
-import java.util.Date;
 import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import miniproject.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,111 +8,60 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Transactional
+@RequestMapping("/subscriptions")
 public class SubscriptionController {
 
     @Autowired
     SubscriptionRepository subscriptionRepository;
 
-    @RequestMapping(
-        value = "/subscriptions/{id}/checksubscription",
-        method = RequestMethod.PUT,
-        produces = "application/json;charset=UTF-8"
-    )
-    public Subscription checkSubscription(
-        @PathVariable(value = "id") Long id,
-        @RequestBody CheckSubscriptionCommand checkSubscriptionCommand,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws Exception {
-        System.out.println("##### /subscription/checkSubscription called #####");
+    //구독 상태(권한) 확인 (userId, bookId 입력)
+    @PutMapping("/{userId}/check")
+    public boolean checkSubscription(
+            @PathVariable Long userId,
+            @RequestBody CheckSubscriptionCommand cmd) throws Exception {
 
-        Optional<Subscription> optionalSubscription = subscriptionRepository.findById(id);
+        Optional<Subscription> opt = subscriptionRepository.findByUserId(userId);
+        if (!opt.isPresent()) throw new Exception("No Subscription Found");
 
-        if (optionalSubscription.isPresent()) {
-            Subscription subscription = optionalSubscription.get();
-
-            // 유효 기간 비교
-            Date now = new Date();
-            if (
-                "구독중".equals(subscription.getSubscriptionStatus()) &&
-                subscription.getSubscriptionExpiryDate() != null &&
-                subscription.getSubscriptionExpiryDate().after(now)
-            ) {
-                // 접근 허용
-                BookAccessGranted granted = new BookAccessGranted(subscription);
-                granted.publishAfterCommit();
-            } else {
-                // 접근 거부
-                BookAccessDenied denied = new BookAccessDenied(subscription);
-                denied.publishAfterCommit();
-            }
-
-            return subscription;
-        } else {
-            throw new Exception("No Entity Found");
-        }
+        
+        return opt.get().checkSubscription(cmd, null); 
     }
 
-    @RequestMapping(
-        value = "/subscriptions/{id}/subscriptionregister",
-        method = RequestMethod.PUT,
-        produces = "application/json;charset=UTF-8"
-    )
-    public Subscription subscriptionRegister(
-        @PathVariable(value = "id") Long id,
-        @RequestBody SubscriptionRegisterCommand cmd,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws Exception {
-        System.out.println("##### /subscription/subscriptionRegister called #####");
+    //구독 등록 (구독 시작)
+    @PostMapping("/{userId}/register")
+    public Subscription registerSubscription(
+            @PathVariable Long userId,
+            @RequestBody SubscriptionRegisterCommand cmd) {
 
-        Subscription subscription = subscriptionRepository
-            .findById(id)
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
             .orElseGet(() -> {
                 Subscription s = new Subscription();
-                s.setUserId(id);
+                s.setUserId(userId);
                 return s;
             });
 
-        subscription.setSubscriptionStatus("구독중");
-
-        // 30일 뒤로 만료일 설정
-        Date expiry = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30);
-        subscription.setSubscriptionExpiryDate(expiry);
-
-        subscriptionRepository.save(subscription);
-
-        SubscriptionRegistered event = new SubscriptionRegistered(subscription);
-        event.publishAfterCommit();
-
-        return subscription;
+        subscription.subscriptionRegister(cmd);
+        return subscriptionRepository.save(subscription);
     }
 
-    @RequestMapping(
-        value = "/subscriptions/{id}/subscriptioncancel",
-        method = RequestMethod.PUT,
-        produces = "application/json;charset=UTF-8"
-    )
-    public Subscription subscriptionCancel(
-        @PathVariable(value = "id") Long id,
-        @RequestBody SubscriptionCancelCommand cmd,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) throws Exception {
-        System.out.println("##### /subscription/subscriptionCancel called #####");
+    //구독 취소
+    @PutMapping("/{userId}/cancel")
+    public Subscription cancelSubscription(
+            @PathVariable Long userId,
+            @RequestBody SubscriptionCancelCommand cmd) throws Exception {
 
-        Optional<Subscription> optionalSubscription = subscriptionRepository.findById(id);
-        optionalSubscription.orElseThrow(() -> new Exception("No Entity Found"));
+        Subscription subscription = subscriptionRepository.findByUserId(userId)
+            .orElseThrow(() -> new Exception("No Subscription Found"));
 
-        Subscription subscription = optionalSubscription.get();
-        subscription.setSubscriptionStatus("해지됨");
-        subscription.setSubscriptionExpiryDate(null);
+        subscription.subscriptionCancel(cmd);
+        return subscriptionRepository.save(subscription);
+    }
 
-        subscriptionRepository.save(subscription);
-
-        SubscriptionCanceled event = new SubscriptionCanceled(subscription);
-        event.publishAfterCommit();
-
-        return subscription;
+    //구독 현황 조회 (READ)
+    @GetMapping("/{userId}")
+    public Subscription getSubscription(@PathVariable Long userId) throws Exception {
+        return subscriptionRepository.findByUserId(userId)
+            .orElseThrow(() -> new Exception("No Subscription Found"));
     }
 }
+

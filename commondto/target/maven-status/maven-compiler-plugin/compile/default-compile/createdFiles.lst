@@ -1,0 +1,14 @@
+commondto\event\SubscriptionGrantedDto.class
+commondto\OpenAiDto.class
+commondto\event\SubscriptionRequestedDto.class
+commondto\event\WriterRequestDto.class
+commondto\UserDto.class
+commondto\BestsellerDto.class
+commondto\event\SubscriptionDeniedDto.class
+commondto\PointDto.class
+commondto\SubscriptionDto.class
+commondto\event\BookViewedDto.class
+commondto\event\PointChargeRequestedDto.class
+commondto\BookDto.class
+commondto\event\SubscriptionCancelRequestedDto.class
+commondto\WriterDto.class

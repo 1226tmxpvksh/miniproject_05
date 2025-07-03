@@ -6,9 +6,14 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @Component
-public class UserHateoasProcessor
-    implements RepresentationModelProcessor<EntityModel<User>> {
+public class UserHateoasProcessor implements RepresentationModelProcessor<EntityModel<User>> {
+
+    @Autowired
+    private HttpServletRequest request;
 
     @Override
     public EntityModel<User> process(EntityModel<User> model) {
@@ -16,22 +21,29 @@ public class UserHateoasProcessor
         User user = model.getContent();
         if (user == null) return model;
 
-        // 임시 정책: 로그인 미구현 단계이므로, 무조건 계정 생성만 허용
-        boolean isAuthenticated = false; // 로그인 기능 도입 전이므로 항상 false
+        Long sessionUserId = null;
+        if (request.getSession(false) != null) {
+            sessionUserId = (Long) request.getSession(false).getAttribute("userId");
+        }
 
-        if (isAuthenticated) {
-            // 로그인된 상태: 모든 기능 링크 노출
+        boolean isAuthenticated = (sessionUserId != null);
+        boolean isMyPage = isAuthenticated && sessionUserId.equals(user.getUserId());
+
+        if (isAuthenticated && isMyPage) {
+            // 로그인된 본인 계정만 모든 기능 허용
             model.add(Link.of(self + "/subscribe").withRel("subscribe"));
             model.add(Link.of(self + "/cancelsubscription").withRel("cancelsubscription"));
             model.add(Link.of(self + "/writerquest").withRel("writerquest"));
             model.add(Link.of(self + "/chargepoint").withRel("chargepoint"));
-        } else {
-            // 로그인 전: 계정 생성만 가능 (이미 회원이면 register 노출 필요 없을 수도 있음)
-            model.add(Link.of(self + "/register").withRel("register"));
+        } else if (!isAuthenticated) {
+            // 비로그인 상태면 회원가입/로그인만 노출
+            model.add(Link.of("/users/register").withRel("register"));
+            model.add(Link.of("/users/login").withRel("login"));
         }
-
+        
         return model;
     }
 }
+
 
 

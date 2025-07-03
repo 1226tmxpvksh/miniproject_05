@@ -2,7 +2,7 @@ package miniproject.domain;
 
 import java.util.*;
 import lombok.*;
-import miniproject.domain.*;
+
 import miniproject.infra.AbstractEvent;
 
 //<<< DDD / Domain Event

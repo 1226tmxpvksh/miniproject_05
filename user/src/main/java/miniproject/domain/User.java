@@ -11,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Entity
 @Table(name = "User_table")
 @Data
-//<<< DDD / Aggregate Root
 public class User {
 
     @Id
@@ -34,9 +33,6 @@ public class User {
         PasswordEncoder passwordEncoder =
             UserApplication.applicationContext.getBean(PasswordEncoder.class);
         this.passwordHash = passwordEncoder.encode(registerCommand.getPassword());
-
-        Registered registered = new Registered(this);
-        registered.publishAfterCommit();
     }
 
     public void chargePoint(ChargePointCommand chargePointCommand) {
@@ -68,5 +64,4 @@ public class User {
         return encoder.matches(rawPassword, this.passwordHash);
     }
 }
-//>>> DDD / Aggregate Root
 

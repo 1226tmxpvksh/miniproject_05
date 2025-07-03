@@ -1,18 +1,20 @@
 package miniproject.domain;
-
-import lombok.*;
 import miniproject.infra.AbstractEvent;
 
-@Data
-@ToString
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
 @NoArgsConstructor
 public class BookAccessGranted extends AbstractEvent {
-
     private Long userId;
     private Long bookId;
 
-    public BookAccessGranted(Subscription aggregate) {
-        super(aggregate);
-        this.userId = aggregate.getUserId();
+    public BookAccessGranted(Long userId, Long bookId) {
+        this.userId = userId;
+        this.bookId = bookId;
     }
 }
+
+
+

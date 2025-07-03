@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import commondto.UserDto;
+
 @RestController
 @Transactional
 @Slf4j
@@ -25,7 +27,7 @@ public class UserController {
 
     @PostMapping(value = "/users/register", produces = "application/json;charset=UTF-8")
     public User register(@RequestBody RegisterCommand registerCommand) {
-        log.info("▶ /users/register called: {}", registerCommand);
+        log.info("/users/register called: {}", registerCommand);
 
         userRepository.findByEmail(registerCommand.getEmail())
             .ifPresent(u -> { throw new EmailAlreadyExistsException(registerCommand.getEmail()); });
@@ -35,13 +37,18 @@ public class UserController {
 
         User user = new User();
         user.register(registerCommand);
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+
+        Registered registered = new Registered(saved);
+        registered.publishAfterCommit();
+
+        return saved;
     }
 
     // 로그인: 세션에 userId 저장
     @PostMapping(value = "/users/login", produces = "application/json;charset=UTF-8")
     public ResponseEntity<?> login(@RequestBody LoginCommand loginCommand, HttpSession session) {
-        log.info("▶ /users/login called: {}", loginCommand.getEmail());
+        log.info("/users/login called: {}", loginCommand.getEmail());
 
         User user = userRepository.findByEmail(loginCommand.getEmail())
             .orElseThrow(() -> new UserNotFoundException());
@@ -115,6 +122,13 @@ public class UserController {
     private User findUserOrThrow(Long id) {
         return userRepository.findById(id)
             .orElseThrow(UserNotFoundException::new);
+    }
+
+   @GetMapping(value = "/users/{id}/userinfolist", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<UserDto> getUserInfoList(@PathVariable Long id) {
+        User user = findUserOrThrow(id);
+        UserDto dto = new UserDto(user.getUserId(), user.getEmail(), user.getNickname());
+        return ResponseEntity.ok(dto);
     }
 }
 

@@ -1,21 +1,21 @@
 package miniproject.domain;
 
-import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
 import javax.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-//<<< EDA / CQRS
 @Entity
 @Table(name = "SubscriptionStatusCheck_table")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class SubscriptionStatusCheck {
 
     @Id
-    //@GeneratedValue(strategy=GenerationType.AUTO)
-    private Long userId;
+    private Long userId; 
 
-    private String subscriptionStatus;
-    private String subscriptionExpireDate;
+    private String subscriptionStatus;      // ACTIVE, INACTIVE
+    private String subscriptionExpireDate; 
 }
+

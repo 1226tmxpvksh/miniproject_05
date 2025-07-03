@@ -12,11 +12,11 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.MimeTypeUtils;
 
-//<<< Clean Arch / Outbound Adaptor
+// <<< Clean Arch / Outbound Adaptor
 public class AbstractEvent {
 
     String eventType;
-    Long timestamp;
+    String timestamp;   // Long → String
 
     public AbstractEvent(Object aggregate) {
         this();
@@ -25,13 +25,12 @@ public class AbstractEvent {
 
     public AbstractEvent() {
         this.setEventType(this.getClass().getSimpleName());
-        this.timestamp = System.currentTimeMillis();
+        // String 타입, "yyyy-MM-dd HH:mm:ss" 포맷
+        this.timestamp = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            .format(new java.util.Date());
     }
 
     public void publish() {
-        /**
-         * spring streams 방식
-         */
         KafkaProcessor processor = SubscriptionApplication.applicationContext.getBean(
             KafkaProcessor.class
         );
@@ -68,11 +67,11 @@ public class AbstractEvent {
         this.eventType = eventType;
     }
 
-    public Long getTimestamp() {
+    public String getTimestamp() {      // String 반환
         return timestamp;
     }
 
-    public void setTimestamp(Long timestamp) {
+    public void setTimestamp(String timestamp) {  // String 파라미터
         this.timestamp = timestamp;
     }
 
@@ -93,4 +92,5 @@ public class AbstractEvent {
         return json;
     }
 }
-//>>> Clean Arch / Outbound Adaptor
+// >>> Clean Arch / Outbound Adaptor
+

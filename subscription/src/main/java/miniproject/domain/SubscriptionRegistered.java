@@ -4,13 +4,13 @@ import java.util.Date;
 import lombok.*;
 import miniproject.infra.AbstractEvent;
 
-@Data
+@Getter
 @ToString
 @NoArgsConstructor
 public class SubscriptionRegistered extends AbstractEvent {
 
     private Long userId;
-    private String subscriptionStatus;
+    private SubscriptionStatus subscriptionStatus; 
     private Date subscriptionExpiryDate;
 
     public SubscriptionRegistered(Subscription aggregate) {
@@ -20,3 +20,5 @@ public class SubscriptionRegistered extends AbstractEvent {
         this.subscriptionExpiryDate = aggregate.getSubscriptionExpiryDate();
     }
 }
+
+

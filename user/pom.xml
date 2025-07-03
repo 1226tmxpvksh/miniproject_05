@@ -57,17 +57,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- book, bestseller 모듈 의존성 추가 -->
+        <!-- 공통 DTO 모듈 의존성 -->
         <dependency>
             <groupId>miniproject</groupId>
-            <artifactId>book</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>miniproject</groupId>
-            <artifactId>bestseller</artifactId>
-            <version>${project.version}</version>
+            <artifactId>commondto</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
 </project>

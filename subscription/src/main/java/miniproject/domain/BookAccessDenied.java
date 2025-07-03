@@ -1,18 +1,17 @@
 package miniproject.domain;
-
-import lombok.*;
 import miniproject.infra.AbstractEvent;
 
-@Data
-@ToString
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
 @NoArgsConstructor
 public class BookAccessDenied extends AbstractEvent {
-
     private Long userId;
     private Long bookId;
 
-    public BookAccessDenied(Subscription aggregate) {
-        super(aggregate);
-        this.userId = aggregate.getUserId();
+    public BookAccessDenied(Long userId, Long bookId) {
+        this.userId = userId;
+        this.bookId = bookId;
     }
 }

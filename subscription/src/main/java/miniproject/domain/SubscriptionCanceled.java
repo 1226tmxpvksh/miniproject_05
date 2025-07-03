@@ -9,11 +9,12 @@ import miniproject.infra.AbstractEvent;
 public class SubscriptionCanceled extends AbstractEvent {
 
     private Long userId;
-    private String subscriptionStatus;
+    private SubscriptionStatus subscriptionStatus;
 
     public SubscriptionCanceled(Subscription aggregate) {
         super(aggregate);
         this.userId = aggregate.getUserId();
-        this.subscriptionStatus = aggregate.getSubscriptionStatus();
+        this.subscriptionStatus = aggregate.getSubscriptionStatus();  // Enum 타입 그대로 할당
     }
 }
+

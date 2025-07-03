@@ -7,36 +7,29 @@ import org.springframework.hateoas.server.RepresentationModelProcessor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SubscriptionHateoasProcessor
-    implements RepresentationModelProcessor<EntityModel<Subscription>> {
+public class SubscriptionHateoasProcessor implements RepresentationModelProcessor<EntityModel<Subscription>> {
 
     @Override
     public EntityModel<Subscription> process(EntityModel<Subscription> model) {
+        //self 링크: /subscriptions/{userId}
+        String selfHref = model.getRequiredLink("self").getHref();
+
+        //구독 상태(권한) 확인 링크
         model.add(
-            Link
-                .of(
-                    model.getRequiredLink("self").getHref() +
-                    "/checksubscription"
-                )
-                .withRel("checksubscription")
+            Link.of(selfHref + "/check").withRel("check-subscription")
         );
+
+        //구독 등록 링크
         model.add(
-            Link
-                .of(
-                    model.getRequiredLink("self").getHref() +
-                    "/subscriptionregister"
-                )
-                .withRel("subscriptionregister")
+            Link.of(selfHref + "/register").withRel("register-subscription")
         );
+
+        //구독 취소 링크
         model.add(
-            Link
-                .of(
-                    model.getRequiredLink("self").getHref() +
-                    "/subscriptioncancel"
-                )
-                .withRel("subscriptioncancel")
+            Link.of(selfHref + "/cancel").withRel("cancel-subscription")
         );
 
         return model;
     }
 }
+

@@ -9,6 +9,5 @@ public class WriterQuestCommand {
     private Long userId;
     private Date requestedAt = new Date(); // 기본값 현재시각
 
-    // 생성자, 필요시 getter/setter (Lombok)
 }
 
