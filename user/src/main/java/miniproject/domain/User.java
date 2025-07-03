@@ -1,18 +1,18 @@
 package miniproject.domain;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDate;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import javax.persistence.*;
-import lombok.Data;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Column;
+import javax.persistence.PrePersist;
+
 import miniproject.UserApplication;
 
 @Entity
 @Table(name = "User_table")
-@Data
 public class User {
 
     @Id
@@ -23,18 +23,16 @@ public class User {
 
     private String nickname;
 
-    private Integer amount;
-
+    @Column(nullable = false)
+    private Integer amount = 0;
     private Boolean isSubscribed = false;
+    private Boolean writerRequested = false;
 
     private Date subscriptionStart;
-
     private Date subscriptionEnd;
-
-    // --- 이 부분을 추가하세요 ---
-    private Boolean writerRequested;
     private Date writerRequestedAt;
-    // --- 여기까지 추가 ---
+
+    public User() {}
 
     public static UserRepository repository() {
         UserRepository userRepository = UserApplication.applicationContext.getBean(
@@ -43,15 +41,14 @@ public class User {
         return userRepository;
     }
 
+    @PrePersist
+    public void prePersist() {
+        if (this.amount == null) this.amount = 0;
+    }
+
     public void register(RegisterCommand registerCommand) {
         this.email = registerCommand.getEmail();
         this.nickname = registerCommand.getNickname();
-        this.amount = 0;
-        this.isSubscribed = false;
-        this.writerRequested = false; // 기본값 설정
-
-        Registered registered = new Registered(this);
-        registered.publishAfterCommit();
     }
 
     public void subscribe(SubscribeCommand subscribeCommand) {
@@ -61,36 +58,53 @@ public class User {
         Date end = new Date();
         end.setTime(this.subscriptionStart.getTime() + (1000L * 60 * 60 * 24 * 30));
         this.subscriptionEnd = end;
-
-        SubscriptionRequested subscriptionRequested = new SubscriptionRequested(this);
-        subscriptionRequested.publishAfterCommit();
     }
 
-    // --- 이 메서드를 수정하세요 ---
     public void writerQuest(WriterQuestCommand writerQuestCommand) {
-        // 작가 신청 상태를 변경하는 로직 추가
-        this.setWriterRequested(true);
-        this.setWriterRequestedAt(new Date());
+        this.writerRequested = true;
+        this.writerRequestedAt = new Date();
 
-        // 이벤트 발행
-        WriterRequest writerRequest = new WriterRequest(this);
+        // WriterRequest(WriterQuested) 이벤트 발행
+        WriterRequest writerRequest = new WriterRequest();
+        writerRequest.setUserId(this.userId);
         writerRequest.publishAfterCommit();
     }
-    // --- 여기까지 수정 ---
 
     public void cancelSubscription(CancelSubscriptionCommand cancelSubscriptionCommand) {
         this.isSubscribed = false;
         this.subscriptionStart = null;
         this.subscriptionEnd = null;
-
-        SubscriptionCancelRequested subscriptionCancelRequested = new SubscriptionCancelRequested(this);
-        subscriptionCancelRequested.publishAfterCommit();
     }
 
     public void chargePoint(ChargePointCommand chargePointCommand) {
         this.amount += chargePointCommand.getAmount();
-
-        PointChargeRequested pointChargeRequested = new PointChargeRequested(this);
-        pointChargeRequested.publishAfterCommit();
     }
+
+    // Getter/Setter
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getNickname() { return nickname; }
+    public void setNickname(String nickname) { this.nickname = nickname; }
+
+    public Integer getAmount() { return amount; }
+    public void setAmount(Integer amount) { this.amount = amount; }
+
+    public Boolean getIsSubscribed() { return isSubscribed; }
+    public void setIsSubscribed(Boolean isSubscribed) { this.isSubscribed = isSubscribed; }
+
+    public Boolean getWriterRequested() { return writerRequested; }
+    public void setWriterRequested(Boolean writerRequested) { this.writerRequested = writerRequested; }
+
+    public Date getSubscriptionStart() { return subscriptionStart; }
+    public void setSubscriptionStart(Date subscriptionStart) { this.subscriptionStart = subscriptionStart; }
+
+    public Date getSubscriptionEnd() { return subscriptionEnd; }
+    public void setSubscriptionEnd(Date subscriptionEnd) { this.subscriptionEnd = subscriptionEnd; }
+
+    public Date getWriterRequestedAt() { return writerRequestedAt; }
+    public void setWriterRequestedAt(Date writerRequestedAt) { this.writerRequestedAt = writerRequestedAt; }
 }

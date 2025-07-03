@@ -12,6 +12,7 @@ public class BookViewed extends AbstractEvent {
     private String title;
     private String content;
     private Long writerId;
+    private String coverUrl;
     private String status;
     private Integer viewCount; // ✅ 추가: 조회수도 이벤트로 전달 가능
 
@@ -21,6 +22,7 @@ public class BookViewed extends AbstractEvent {
         this.title = aggregate.getTitle();
         this.content = aggregate.getContent();
         this.writerId = aggregate.getWriterId();
+        this.coverUrl = aggregate.getCoverUrl();
         this.status = aggregate.getStatus();
         this.viewCount = aggregate.getViewCount(); // ✅ 여기서 같이 보냄
     }

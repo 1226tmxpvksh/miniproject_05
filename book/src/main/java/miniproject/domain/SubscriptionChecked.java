@@ -6,11 +6,13 @@ import miniproject.infra.AbstractEvent;
 @Data
 @ToString
 @NoArgsConstructor
-public class WriterRequest extends AbstractEvent {
+public class SubscriptionChecked extends AbstractEvent {
 
     private Long userId;
+    private Long bookId;
+    private boolean subscribed;
 
-    public WriterRequest(Object aggregate) {
+    public SubscriptionChecked(Object aggregate) {
         super(aggregate);
     }
 }

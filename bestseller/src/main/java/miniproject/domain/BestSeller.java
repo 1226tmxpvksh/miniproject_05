@@ -29,7 +29,7 @@ public class BestSeller {
         BookViewIncreased bookViewIncreased = new BookViewIncreased(this);
         bookViewIncreased.publishAfterCommit();
 
-        if (this.viewCount >= 100 && !"베스트셀러".equals(this.selectedStatus)) {
+        if (this.viewCount >= 5 && !"베스트셀러".equals(this.selectedStatus)) {
             this.selectBestSeller(new SelectBestSellerCommand(this.bookId));
         }
     }

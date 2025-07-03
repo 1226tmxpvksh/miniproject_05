@@ -115,9 +115,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
     command: mvn spring-boot:run
     ports:
-      - 8088:8088
+      - 8090:8090
     working_dir: /usr/src
     volumes:
       - ./point:/usr/src
       - ./maven-repo:/root/.m2
-      

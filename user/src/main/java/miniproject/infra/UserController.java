@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-//<<< Clean Arch / Inbound Adaptor
-
 @RestController
 @Transactional
 public class UserController {
@@ -32,11 +30,18 @@ public class UserController {
         System.out.println("##### /user/register  called #####");
         User user = new User();
         user.register(registerCommand);
-
         userRepository.save(user);
         return user;
     }
 
+    @GetMapping("/users/{id}/raw")
+    public User getUserRaw(@PathVariable("id") Long id) throws Exception {
+        Optional<User> optionalUser = userRepository.findById(id);
+        optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
+        return optionalUser.get();
+    }
+
+    // --- 이 메서드를 수정했습니다 ---
     @RequestMapping(
         value = "/users/{id}/subscribe",
         method = RequestMethod.PUT,
@@ -44,7 +49,7 @@ public class UserController {
     )
     public User subscribe(
         @PathVariable(value = "id") Long id,
-        @RequestBody SubscribeCommand subscribeCommand,
+        // @RequestBody를 삭제했습니다.
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
@@ -53,11 +58,17 @@ public class UserController {
 
         optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
         User user = optionalUser.get();
+
+        // Command 객체를 여기서 직접 생성합니다.
+        SubscribeCommand subscribeCommand = new SubscribeCommand();
+        // subscribeCommand.setUserId(id); // 필요 시 값 설정
+        
         user.subscribe(subscribeCommand);
 
         userRepository.save(user);
         return user;
     }
+    // --- 여기까지 수정 ---
 
     @RequestMapping(
         value = "/users/{id}/writerquest",
@@ -66,7 +77,6 @@ public class UserController {
     )
     public User writerQuest(
         @PathVariable(value = "id") Long id,
-        @RequestBody WriterQuestCommand writerQuestCommand,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
@@ -75,12 +85,15 @@ public class UserController {
 
         optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
         User user = optionalUser.get();
+        
+        WriterQuestCommand writerQuestCommand = new WriterQuestCommand();
         user.writerQuest(writerQuestCommand);
 
         userRepository.save(user);
         return user;
     }
 
+    // --- cancelSubscription도 수정하는 것을 권장합니다 ---
     @RequestMapping(
         value = "/users/{id}/cancelsubscription",
         method = RequestMethod.PUT,
@@ -88,7 +101,6 @@ public class UserController {
     )
     public User cancelSubscription(
         @PathVariable(value = "id") Long id,
-        @RequestBody CancelSubscriptionCommand cancelSubscriptionCommand,
         HttpServletRequest request,
         HttpServletResponse response
     ) throws Exception {
@@ -97,11 +109,14 @@ public class UserController {
 
         optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
         User user = optionalUser.get();
+        
+        CancelSubscriptionCommand cancelSubscriptionCommand = new CancelSubscriptionCommand();
         user.cancelSubscription(cancelSubscriptionCommand);
 
         userRepository.save(user);
         return user;
     }
+    // --- 여기까지 ---
 
     @RequestMapping(
         value = "/users/{id}/chargepoint",
@@ -115,6 +130,9 @@ public class UserController {
         HttpServletResponse response
     ) throws Exception {
         System.out.println("##### /user/chargePoint  called #####");
+        System.out.println("chargePointCommand: " + chargePointCommand);
+        System.out.println("chargePointCommand.amount: " + chargePointCommand.getAmount());
+        System.out.println("chargePointCommand.userId: " + chargePointCommand.getUserId());
         Optional<User> optionalUser = userRepository.findById(id);
 
         optionalUser.orElseThrow(() -> new Exception("No Entity Found"));
@@ -125,4 +143,3 @@ public class UserController {
         return user;
     }
 }
-//>>> Clean Arch / Inbound Adaptor

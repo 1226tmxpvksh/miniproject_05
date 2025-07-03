@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8090
 
 spring:
   application:
@@ -47,7 +47,7 @@ logging:
 
 
 server:
-  port: 8088
+  port: 8090
 
 ---
 
@@ -80,5 +80,3 @@ spring:
         event-out:
           destination: miniproject
           contentType: application/json
-
-

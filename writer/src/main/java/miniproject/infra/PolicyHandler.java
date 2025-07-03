@@ -30,6 +30,7 @@ public class PolicyHandler {
         System.out.println(
             "\n\n##### listener WriterRequest : " + writerRequest + "\n\n"
         );
+        System.out.println("📩 [PolicyHandler] WriterRequest 수신됨: " + writerRequest);
         Writer.writerRequest(writerRequest);
     }
 

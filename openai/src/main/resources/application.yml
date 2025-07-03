@@ -45,6 +45,11 @@ logging:
     org.hibernate.type: trace
     org.springframework.cloud: debug
 
+openai:
+  api:
+    key: ${OPENAI_API_KEY} # Gitpod 환경 변수(secrets)에서 API 키를 가져옵니다.
+    url: "https://api.openai.com/v1/images/generations"
+
 api:
   url: 
     openai: localhost:8087 

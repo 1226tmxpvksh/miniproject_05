@@ -9,6 +9,8 @@ spring:
 spring:
   profiles: default
   jpa:
+    hibernate:
+      ddl-auto: update
     properties:
       hibernate:
         show_sql: true
@@ -80,5 +82,3 @@ spring:
         event-out:
           destination: miniproject
           contentType: application/json
-
-

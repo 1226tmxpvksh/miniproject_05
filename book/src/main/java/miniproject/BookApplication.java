@@ -12,6 +12,11 @@ import org.springframework.context.ApplicationContext;
 @EnableFeignClients
 public class BookApplication {
 
+    @org.springframework.context.annotation.Bean
+    public org.springframework.web.client.RestTemplate restTemplate() {
+        return new org.springframework.web.client.RestTemplate();
+    }
+
     public static ApplicationContext applicationContext;
 
     public static void main(String[] args) {

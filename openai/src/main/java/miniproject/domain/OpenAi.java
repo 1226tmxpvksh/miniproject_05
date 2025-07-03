@@ -2,7 +2,7 @@ package miniproject.domain;
 
 import lombok.Data;
 import miniproject.OpenaiApplication;
-import javax.persistence.*;
+import javax.persistence.*; // 기존 javax 유지
 
 @Entity
 @Table(name = "OpenAi_table")
@@ -15,6 +15,8 @@ public class OpenAi {
 
     private Long bookId;
     private String prompt;
+    
+    @Column(length = 1024)
     private String coverUrl;
 
     public static OpenAiRepository repository() {
@@ -28,30 +30,16 @@ public class OpenAi {
         // CoverCreated coverCreated = new CoverCreated(this);
         // coverCreated.publishAfterCommit();
     }
-
-    // ✅ CoverGenerationRequested 이벤트 수신 시 처리 로직
-    public static void coverGenerationRequested(CoverGenerationRequested event) {
-        OpenAi openAi = new OpenAi();
-        openAi.setBookId(event.getBookId());
-
-        String prompt = "Generate a book cover for: " + event.getTitle() + " - " + event.getContent();
-        openAi.setPrompt(prompt);
-
-        String coverUrl = "https://fake-cover.com/image/" + event.getBookId() + ".png";
-        openAi.setCoverUrl(coverUrl);
-
-        repository().save(openAi);
-
-        CoverCreated coverCreated = new CoverCreated(openAi);
-        coverCreated.publishAfterCommit();
-    }
     
-    // ✅ Controller에서 호출할 Command 처리 메서드 (추가된 부분)
+    // Controller에서 호출할 Command 처리 메서드 (이것은 남겨둡니다)
     public void bookCoverCreate(BookCoverCreateCommand bookCoverCreateCommand) {
         this.setBookId(bookCoverCreateCommand.getBookId());
         this.setPrompt(bookCoverCreateCommand.getPrompt());
 
-        String generatedCoverUrl = "https://generated-cover.com/image/" + this.getBookId() + ".jpg";
+        // 이 부분의 로직은 PolicyHandler와 DalleApiService가 담당하므로,
+        // 여기서는 Command의 값을 Entity에 설정하는 역할만 합니다.
+        // 실제 URL 생성은 다른 곳에서 이루어집니다.
+        String generatedCoverUrl = "https://placeholder-image.com/image/" + this.getBookId() + ".jpg";
         this.setCoverUrl(generatedCoverUrl);
     }
 }

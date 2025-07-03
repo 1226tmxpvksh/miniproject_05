@@ -16,6 +16,46 @@ public class BestSellerListViewHandler {
     @Autowired
     private BestSellerListRepository bestSellerListRepository;
 
+    @StreamListener(
+        value = KafkaProcessor.INPUT,
+        condition = "headers['type']=='BookViewed'"
+    )
+    public void whenBookViewed_then_CreateOrUpdate(@Payload BookViewed bookViewed) {
+        try {
+            if (!bookViewed.validate()) return;
+            
+            // bookId로 기존 BestSellerList 데이터가 있는지 조회합니다.
+            // BestSellerListRepository에 findByBookId 메서드가 있어야 합니다.
+            Optional<BestSellerList> bestSellerListOptional = bestSellerListRepository.findByBookId(bookViewed.getBookId());
+            
+            BestSellerList bestSellerList;
+            if(bestSellerListOptional.isPresent()) {
+                // 데이터가 있으면 기존 객체를 가져옵니다.
+                bestSellerList = bestSellerListOptional.get();
+            } else {
+                // 데이터가 없으면 (최초 조회), 새로 생성하고 ID를 설정합니다.
+                bestSellerList = new BestSellerList();
+                bestSellerList.setBookId(bookViewed.getBookId());
+            }
+
+            // 공통 정보 업데이트
+            bestSellerList.setTitle(bookViewed.getTitle());
+            
+            // 조회수 업데이트
+            int currentViewCount = bestSellerList.getViewCount() != null ? bestSellerList.getViewCount() : 0;
+            bestSellerList.setViewCount(currentViewCount + 1);
+
+            // 이벤트에 있는 다른 정보들도 업데이트
+            bestSellerList.setCoverUrl(bookViewed.getCoverUrl());
+            bestSellerList.setWriterId(bookViewed.getWriterId());
+
+            bestSellerListRepository.save(bestSellerList);
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     // 베스트셀러 선정 시 View 생성
     @StreamListener(KafkaProcessor.INPUT)
     public void whenBestsellerSelected_then_CREATE_1(

@@ -55,6 +55,24 @@ public class Writer {
         this.publishStatus = "출간승인됨";
         PubApproved event = new PubApproved(this);
         event.publishAfterCommit();
+
+        // --- 출간 승인 시 bookLists에 도서 정보 추가 ---
+        try {
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            java.util.Map<String, Object> bookListPayload = new java.util.HashMap<>();
+            bookListPayload.put("bookId", cmd.getBookId());
+            bookListPayload.put("writerId", cmd.getWriterId());
+            bookListPayload.put("title", cmd.getTitle());
+            bookListPayload.put("content", cmd.getContent());
+            bookListPayload.put("coverUrl", cmd.getCoverUrl());
+            // book 서비스는 8082 포트로 동작 (gateway 라우팅 기준)
+            String bookServiceUrl = "http://book:8080/bookLists";
+            restTemplate.postForEntity(bookServiceUrl, bookListPayload, String.class);
+        } catch (Exception e) {
+            // 예외 발생 시 로깅
+            System.out.println("bookLists 연동 실패: " + e.getMessage());
+        }
+        // ------------------------------------------
     }
 
     // 출간 거절

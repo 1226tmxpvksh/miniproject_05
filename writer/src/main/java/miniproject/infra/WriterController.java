@@ -7,6 +7,7 @@ import javax.transaction.Transactional;
 import miniproject.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/writers")
@@ -15,6 +16,31 @@ public class WriterController {
 
     @Autowired
     WriterRepository writerRepository;
+
+    // Writer 단일 조회 API
+    @GetMapping(value = "/{id}", produces = "application/json;charset=UTF-8")
+    public Writer getWriter(@PathVariable("id") Long id) {
+        return writerRepository.findById(id).orElse(null);
+    }
+
+    // Writer 생성 API (userId, nickname 등)
+    @PostMapping(value = "", produces = "application/json;charset=UTF-8")
+    public Writer createWriter(@RequestBody Map<String, Object> body) {
+        Long userId = body.get("userId") != null ? Long.valueOf(body.get("userId").toString()) : null;
+        String nickname = body.get("nickname") != null ? body.get("nickname").toString() : null;
+        Writer writer = new Writer();
+        writer.setWriterId(userId);
+        // nickname 등 추가 필드가 있다면 writer.setNickname(nickname);
+        writerRepository.save(writer);
+        return writer;
+    }
+
+    // 작가 신청(WriterRequest) API 추가
+    @PostMapping(value = "/writerrequest", produces = "application/json;charset=UTF-8")
+    public Writer writerRequest(@RequestBody WriterRequest writerRequest) {
+        Writer.writerRequest(writerRequest);
+        return writerRepository.findById(writerRequest.getUserId()).orElse(null);
+    }
 
     @PutMapping(value = "/{id}/writerapprove", produces = "application/json;charset=UTF-8")
     public Writer writerApprove(
